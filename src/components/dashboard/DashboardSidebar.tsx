@@ -19,23 +19,6 @@ import {
   X,
   Shield,
 } from "lucide-react";
-  Star,
-  ShoppingCart,
-  LineChart,
-  Briefcase,
-  ClipboardList,
-  History,
-  Wallet,
-  Bell,
-  Settings,
-  HelpCircle,
-  ChevronLeft,
-  ChevronRight,
-  LogOut,
-  User,
-  Menu,
-  X,
-} from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import { useState, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
