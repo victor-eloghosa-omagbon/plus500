@@ -211,6 +211,21 @@ const DashboardSidebar = ({ displayName }: DashboardSidebarProps) => {
             </NavLink>
           );
         })}
+        {isAdmin && (
+          <NavLink
+            to="/admin"
+            className={cn(
+              "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group mt-2 border border-white/20",
+              location.pathname.startsWith("/admin")
+                ? "bg-white/15 text-white shadow-sm"
+                : "text-amber-300 hover:text-white hover:bg-white/8"
+            )}
+            title={!isMobile && collapsed ? "Admin Panel" : undefined}
+          >
+            <Shield size={18} className="shrink-0" />
+            {(isMobile || !collapsed) && <span>Admin Panel</span>}
+          </NavLink>
+        )}
       </nav>
 
       {/* User & Collapse */}
