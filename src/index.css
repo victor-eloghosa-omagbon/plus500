@@ -1,0 +1,147 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide scrollbar globally */
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* Premium thin scrollbar for dashboard */
+.premium-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+.premium-scrollbar::-webkit-scrollbar {
+  display: block;
+  width: 4px;
+}
+.premium-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.premium-scrollbar::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--border));
+  border-radius: 9999px;
+}
+.premium-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.4);
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 224 85% 42%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 224 85% 42%;
+
+    --radius: 0.5rem;
+
+    /* Custom fintech tokens */
+    --surface: 210 33% 98%;
+    --surface-dark: 224 50% 8%;
+    --surface-card: 224 40% 12%;
+    --surface-card-hover: 224 38% 15%;
+    --hero-blue: 224 85% 38%;
+    --hero-blue-light: 220 78% 48%;
+    --brand-accent: 202 100% 54%;
+    --trust-green: 158 64% 52%;
+    --profit-green: 142 71% 45%;
+    --loss-red: 0 84% 60%;
+    --text-muted: 215 25% 47%;
+    --text-subtle: 215 19% 65%;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
+
+@layer utilities {
+  .gradient-brand {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(187 86% 43%));
+  }
+  .gradient-brand-text {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(187 86% 43%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-bg {
+    background: #0c2780;
+  }
+  .gradient-glow {
+    background: radial-gradient(ellipse at 50% 50%, hsl(224 85% 42% / 0.15), transparent 70%);
+  }
+  .glass-nav {
+    backdrop-filter: blur(12px);
+    background: hsl(0 0% 100% / 0.85);
+  }
+  .hero-plus {
+    @apply absolute;
+    color: hsl(220 80% 55% / 0.4);
+    font-weight: 800;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    text-shadow: 2px 4px 8px hsl(220 80% 30% / 0.3);
+    line-height: 1;
+  }
+  .skew-card {
+    transform: skewY(-1.5deg);
+  }
+  .counter-skew {
+    transform: skewY(1.5deg);
+  }
+  @media (min-width: 768px) {
+    .skew-card {
+      transform: skewY(-3deg);
+    }
+    .counter-skew {
+      transform: skewY(3deg);
+    }
+  }
+}
