@@ -51,9 +51,23 @@ interface DashboardSidebarProps {
 const DashboardSidebar = ({ displayName }: DashboardSidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { getPrice } = usePrices();
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      const { data } = await supabase.rpc("has_role", {
+        _user_id: session.user.id,
+        _role: "admin",
+      });
+      setIsAdmin(!!data);
+    };
+    checkAdmin();
+  }, []);
 
   const [accountData, setAccountData] = useState({
     balance: "$0.00",
