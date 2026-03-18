@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,8 +6,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useOrders } from "@/hooks/useOrders";
 import { ASSETS } from "@/components/dashboard/assetsData";
-
-const instruments = ASSETS.map((a) => ({ symbol: a.symbol, name: a.name, price: a.price }));
+import { usePrices } from "@/contexts/PriceContext";
 
 const orderTypes = ["Market", "Limit", "Stop"];
 const leverageOptions = ["1:10", "1:20", "1:50", "1:100", "1:200"];
