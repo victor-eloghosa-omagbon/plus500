@@ -12,6 +12,17 @@ const orderTypes = ["Market", "Limit", "Stop"];
 const leverageOptions = ["1:10", "1:20", "1:50", "1:100", "1:200"];
 
 const TradePage = () => {
+  const { getPrice, getChange } = usePrices();
+
+  const instruments = useMemo(() =>
+    ASSETS.map((a) => ({
+      symbol: a.symbol,
+      name: a.name,
+      price: getPrice(a.symbol) || a.price,
+    })),
+    [getPrice]
+  );
+
   const [selectedInstrument, setSelectedInstrument] = useState(instruments[0]);
   const [orderType, setOrderType] = useState<"buy" | "sell">("buy");
   const [orderMode, setOrderMode] = useState("Market");
