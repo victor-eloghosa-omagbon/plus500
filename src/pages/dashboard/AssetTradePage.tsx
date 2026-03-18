@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowUpCircle, ArrowDownCircle, TrendingUp, TrendingDown, Brain, RefreshCw } from "lucide-react";
+import { ArrowLeft, ArrowUpCircle, ArrowDownCircle, TrendingUp, TrendingDown, Brain, RefreshCw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -9,32 +9,8 @@ import PriceChart from "@/components/dashboard/PriceChart";
 import ReactMarkdown from "react-markdown";
 import { useOrders } from "@/hooks/useOrders";
 import { usePrices } from "@/contexts/PriceContext";
-
-const allInstruments = [
-  { symbol: "EUR/USD", name: "Euro / US Dollar", category: "Forex", spread: "0.6" },
-  { symbol: "GBP/USD", name: "British Pound / US Dollar", category: "Forex", spread: "0.9" },
-  { symbol: "USD/JPY", name: "US Dollar / Japanese Yen", category: "Forex", spread: "0.7" },
-  { symbol: "AUD/USD", name: "Australian Dollar / US Dollar", category: "Forex", spread: "0.8" },
-  { symbol: "BTC/USD", name: "Bitcoin", category: "Crypto", spread: "35" },
-  { symbol: "ETH/USD", name: "Ethereum", category: "Crypto", spread: "2.5" },
-  { symbol: "SOL/USD", name: "Solana", category: "Crypto", spread: "0.8" },
-  { symbol: "XRP/USD", name: "Ripple", category: "Crypto", spread: "0.003" },
-  { symbol: "AAPL", name: "Apple Inc.", category: "Stocks", spread: "0.12" },
-  { symbol: "TSLA", name: "Tesla Inc.", category: "Stocks", spread: "0.25" },
-  { symbol: "NVDA", name: "NVIDIA Corp.", category: "Stocks", spread: "0.45" },
-  { symbol: "AMZN", name: "Amazon.com Inc.", category: "Stocks", spread: "0.15" },
-  { symbol: "XAU/USD", name: "Gold", category: "Commodities", spread: "0.35" },
-  { symbol: "XAG/USD", name: "Silver", category: "Commodities", spread: "0.03" },
-  { symbol: "CL", name: "Crude Oil", category: "Commodities", spread: "0.04" },
-  { symbol: "NG", name: "Natural Gas", category: "Commodities", spread: "0.005" },
-  { symbol: "US500", name: "S&P 500", category: "Indices", spread: "0.4" },
-  { symbol: "US30", name: "Dow Jones 30", category: "Indices", spread: "1.5" },
-  { symbol: "NAS100", name: "Nasdaq 100", category: "Indices", spread: "0.8" },
-  { symbol: "UK100", name: "FTSE 100", category: "Indices", spread: "0.6" },
-  { symbol: "ZW", name: "Wheat", category: "Agriculture", spread: "0.5" },
-  { symbol: "ZC", name: "Corn", category: "Agriculture", spread: "0.4" },
-  { symbol: "HG", name: "Copper", category: "Metals", spread: "0.02" },
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const leverageOptions = ["1:10", "1:20", "1:50", "1:100", "1:200"];
 const orderModes = ["Market", "Limit", "Stop"];
@@ -45,9 +21,24 @@ const AssetTradePage = () => {
   const { symbol } = useParams<{ symbol: string }>();
   const navigate = useNavigate();
   const decoded = decodeURIComponent(symbol || "");
-  const asset = allInstruments.find((i) => i.symbol === decoded);
   const { getPrice, getChange } = usePrices();
   const { orders, placeOrder, closePosition } = useOrders();
+
+  // Fetch instrument from database
+  const { data: asset, isLoading: assetLoading } = useQuery({
+    queryKey: ["instrument", decoded],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("market_instruments")
+        .select("symbol, name, category, spread")
+        .eq("symbol", decoded)
+        .eq("is_active", true)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!decoded,
+  });
 
   const [orderType, setOrderType] = useState<"buy" | "sell">("buy");
   const [orderMode, setOrderMode] = useState("Market");
@@ -64,6 +55,11 @@ const AssetTradePage = () => {
   // Get live price
   const livePrice = asset ? (getPrice(asset.symbol) || 0) : 0;
   const liveChange = asset ? (getChange(asset.symbol) || 0) : 0;
+
+  // Compute bid/ask from spread
+  const spreadNum = asset ? parseFloat(asset.spread) || 0 : 0;
+  const bid = livePrice - spreadNum / 2;
+  const ask = livePrice + spreadNum / 2;
 
   // Find open positions for this asset
   const openPositions = orders
@@ -152,6 +148,14 @@ const AssetTradePage = () => {
     if (asset) runAnalysis();
   }, [asset?.symbol]);
 
+  if (assetLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   if (!asset) {
     return (
       <div className="px-4 sm:px-6 py-5 max-w-7xl mx-auto">
@@ -165,9 +169,6 @@ const AssetTradePage = () => {
 
   const formatPrice = (p: number) =>
     p < 10 ? p.toFixed(4) : p.toLocaleString(undefined, { minimumFractionDigits: 2 });
-
-  const bid = livePrice * 0.9999;
-  const ask = livePrice * 1.0001;
 
   const handlePlaceOrder = async () => {
     if (!amount || parseFloat(amount) <= 0) {
