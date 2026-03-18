@@ -1,11 +1,13 @@
 import { LineChart } from "lucide-react";
 import { useWatchlist } from "@/contexts/WatchlistContext";
+import { usePrices } from "@/contexts/PriceContext";
 import { useNavigate } from "react-router-dom";
 import PriceChart from "@/components/dashboard/PriceChart";
 import { cn } from "@/lib/utils";
 
 const ChartsPage = () => {
   const { watchlist, loading } = useWatchlist();
+  const { getPrice, getChange } = usePrices();
   const navigate = useNavigate();
 
   if (loading) {
@@ -33,31 +35,35 @@ const ChartsPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-          {watchlist.map((item) => (
-            <div
-              key={item.symbol}
-              className="bg-background rounded-xl border border-border overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
-              onClick={() => navigate(`/dashboard/trade/${encodeURIComponent(item.symbol)}`)}
-            >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                <div>
-                  <p className="text-sm font-bold text-foreground">{item.symbol}</p>
-                  <p className="text-xs text-muted-foreground">{item.name}</p>
+          {watchlist.map((item) => {
+            const price = getPrice(item.symbol);
+            const change = getChange(item.symbol);
+            return (
+              <div
+                key={item.symbol}
+                className="bg-background rounded-xl border border-border overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => navigate(`/dashboard/trade/${encodeURIComponent(item.symbol)}`)}
+              >
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{item.symbol}</p>
+                    <p className="text-xs text-muted-foreground">{item.name}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-mono font-semibold text-foreground">
+                      {price < 10 ? price.toFixed(4) : price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                    </p>
+                    <p className={cn("text-xs font-semibold", change >= 0 ? "text-profit-green" : "text-loss-red")}>
+                      {change >= 0 ? "+" : ""}{change.toFixed(2)}%
+                    </p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-mono font-semibold text-foreground">
-                    {item.price < 10 ? item.price.toFixed(4) : item.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                  </p>
-                  <p className={cn("text-xs font-semibold", item.change >= 0 ? "text-emerald-500" : "text-red-500")}>
-                    {item.change >= 0 ? "+" : ""}{item.change.toFixed(2)}%
-                  </p>
+                <div className="p-2">
+                  <PriceChart symbol={item.symbol} basePrice={price} change={change} />
                 </div>
               </div>
-              <div className="p-2">
-                <PriceChart symbol={item.symbol} basePrice={item.price} change={item.change} />
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

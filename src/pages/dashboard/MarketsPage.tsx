@@ -36,15 +36,9 @@ const MarketsPage = () => {
   });
 
   const handleToggle = (inst: typeof instruments[0]) => {
-    const price = getPrice(inst.symbol);
-    const change = getChange(inst.symbol);
     toggleWatchlist({
       symbol: inst.symbol,
       name: inst.name,
-      price,
-      change,
-      bid: price * 0.9999,
-      ask: price * 1.0001,
       category: inst.category,
       spread: inst.spread,
     });

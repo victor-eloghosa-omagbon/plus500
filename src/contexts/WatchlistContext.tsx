@@ -1,15 +1,10 @@
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { usePrices } from "@/contexts/PriceContext";
 
 export interface WatchlistItem {
   symbol: string;
   name: string;
-  price: number;
-  change: number;
-  bid: number;
-  ask: number;
   category: string;
   spread: string;
 }
@@ -28,7 +23,6 @@ const WatchlistContext = createContext<WatchlistContextType | undefined>(undefin
 export const WatchlistProvider = ({ children }: { children: ReactNode }) => {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { getPrice, getChange } = usePrices();
 
   const fetchWatchlist = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -46,24 +40,16 @@ export const WatchlistProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const items: WatchlistItem[] = (data || []).map((row: any) => {
-      const price = getPrice(row.symbol);
-      const change = getChange(row.symbol);
-      return {
-        symbol: row.symbol,
-        name: row.name,
-        price,
-        change,
-        bid: price * 0.9999,
-        ask: price * 1.0001,
-        category: row.category,
-        spread: row.spread,
-      };
-    });
+    const items: WatchlistItem[] = (data || []).map((row: any) => ({
+      symbol: row.symbol,
+      name: row.name,
+      category: row.category,
+      spread: row.spread,
+    }));
 
     setWatchlist(items);
     setLoading(false);
-  }, [getPrice, getChange]);
+  }, []);
 
   useEffect(() => {
     fetchWatchlist();
