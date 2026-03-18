@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,13 +6,23 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useOrders } from "@/hooks/useOrders";
 import { ASSETS } from "@/components/dashboard/assetsData";
-
-const instruments = ASSETS.map((a) => ({ symbol: a.symbol, name: a.name, price: a.price }));
+import { usePrices } from "@/contexts/PriceContext";
 
 const orderTypes = ["Market", "Limit", "Stop"];
 const leverageOptions = ["1:10", "1:20", "1:50", "1:100", "1:200"];
 
 const TradePage = () => {
+  const { getPrice, getChange } = usePrices();
+
+  const instruments = useMemo(() =>
+    ASSETS.map((a) => ({
+      symbol: a.symbol,
+      name: a.name,
+      price: getPrice(a.symbol) || a.price,
+    })),
+    [getPrice]
+  );
+
   const [selectedInstrument, setSelectedInstrument] = useState(instruments[0]);
   const [orderType, setOrderType] = useState<"buy" | "sell">("buy");
   const [orderMode, setOrderMode] = useState("Market");
@@ -72,7 +82,7 @@ const TradePage = () => {
             ))}
           </div>
           <p className="text-xl font-bold text-foreground mt-3">
-            {selectedInstrument.name} — ${selectedInstrument.price < 10 ? selectedInstrument.price.toFixed(4) : selectedInstrument.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            {selectedInstrument.name} — ${(getPrice(selectedInstrument.symbol) || selectedInstrument.price) < 10 ? (getPrice(selectedInstrument.symbol) || selectedInstrument.price).toFixed(4) : (getPrice(selectedInstrument.symbol) || selectedInstrument.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </p>
         </div>
 
