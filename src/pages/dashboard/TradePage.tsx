@@ -82,7 +82,7 @@ const TradePage = () => {
             ))}
           </div>
           <p className="text-xl font-bold text-foreground mt-3">
-            {selectedInstrument.name} — ${selectedInstrument.price < 10 ? selectedInstrument.price.toFixed(4) : selectedInstrument.price.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            {selectedInstrument.name} — ${(getPrice(selectedInstrument.symbol) || selectedInstrument.price) < 10 ? (getPrice(selectedInstrument.symbol) || selectedInstrument.price).toFixed(4) : (getPrice(selectedInstrument.symbol) || selectedInstrument.price).toLocaleString(undefined, { minimumFractionDigits: 2 })}
           </p>
         </div>
 
